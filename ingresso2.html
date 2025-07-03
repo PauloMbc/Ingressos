@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineTickets - Finalizar Compra</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .ingresso-card {
+      background: #1a202c;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .ingresso-card h2 {
+      color: #f56565;
+    }
+
+    .ingresso-card .details {
+      color: #e2e8f0;
+    }
+
+    .button-finalizar {
+      background-color: #f56565;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-finalizar:hover {
+      background-color: #c53030;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+  <header class="bg-red-600 p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">CineTickets 🎬</h1>
+    <div class="flex gap-4 items-center">
+      <button onclick="abrirModalCarrinho()" class="text-white hover:text-gray-200 text-2xl" title="Carrinho">
+        🛒
+      </button>
+      <a href="/adm.html" class="text-white hover:text-gray-200" title="Área Administrativa">
+        ⚙️
+      </a>
+    </div>
+  </header>
+
+  <main class="p-6 max-w-4xl mx-auto">
+    <section class="mb-8 ingresso-card">
+      <h2 class="text-2xl font-semibold mb-4">Detalhes do Ingresso</h2>
+
+      <div class="details">
+        <h3 class="font-semibold">Filme Selecionado</h3>
+        <div id="detalhesFilme" class="mb-4">
+          <!-- Detalhes do filme carregados dinamicamente aqui -->
+        </div>
+
+        <h3 class="font-semibold">Informações do Cliente</h3>
+        <form id="formCliente" class="space-y-4">
+          <input type="text" id="nome" placeholder="Nome Completo" class="w-full p-2 bg-gray-700 text-white rounded" required>
+          <input type="email" id="email" placeholder="Email" class="w-full p-2 bg-gray-700 text-white rounded" required>
+          <input type="tel" id="telefone" placeholder="Telefone" class="w-full p-2 bg-gray-700 text-white rounded" required>
+          <button type="submit" class="button-finalizar">Finalizar Compra</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="text-center p-4 text-gray-400 mt-10">
+    © 2025 CineTickets. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    function carregarCarrinho() {
+      const dados = localStorage.getItem('carrinho');
+      return dados ? JSON.parse(dados) : [];
+    }
+
+    function renderizarDetalhesFilme() {
+      const carrinho = carregarCarrinho();
+      const detalhesFilme = document.getElementById('detalhesFilme');
+      
+      if (carrinho.length === 0) {
+        detalhesFilme.innerHTML = '<p>Nenhum filme selecionado.</p>';
+      } else {
+        carrinho.forEach(filme => {
+          detalhesFilme.innerHTML = `
+            <div>
+              <img src="${filme.capa}" alt="${filme.titulo}" class="w-32 h-48 rounded-md mb-4">
+              <h4 class="font-semibold">${filme.titulo}</h4>
+              <p><strong>Gênero:</strong> ${filme.genero}</p>
+              <p><strong>Duração:</strong> ${filme.duracao} min</p>
+              <p><strong>Classificação:</strong> ${filme.classificacao}</p>
+            </div>
+          `;
+        });
+      }
+    }
+
+   function finalizarCompra(event) {
+      event.preventDefault();
+      
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const telefone = document.getElementById('telefone').value;
+
+      if (nome && email && telefone) {
+        alert(`Compra finalizada!\nNome: ${nome}\nEmail: ${email}\nTelefone: ${telefone}`);
+        localStorage.removeItem('carrinho');
+        window.location.href = 'index.html';
+      } else {
+        alert('Por favor, preencha todos os campos.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderizarDetalhesFilme();
+      document.getElementById('formCliente').addEventListener('submit', finalizarCompra);
+    });
+  </script>
+</body>
+</html>

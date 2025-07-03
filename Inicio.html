@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineTickets - Compre seu Ingresso</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+  <!-- Cabeçalho do site -->
+  <header class="bg-red-600 p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">CineTickets 🎬</h1>
+    <div class="flex gap-4 items-center">
+      <!-- Botão do carrinho -->
+      <button onclick="abrirModalCarrinho()" class="text-white hover:text-gray-200 text-2xl" title="Carrinho">
+        🛒
+      </button>
+      <!-- Link para a área administrativa -->
+      <a href="../Adm.html" class="text-white hover:text-gray-200" title="Área Administrativa">
+        ⚙️
+      </a>
+    </div>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <main class="p-6 max-w-4xl mx-auto">
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Escolha seu filme</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-gray-800 rounded-lg">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left">Capa</th>
+              <th class="px-4 py-2 text-left">Título</th>
+              <th class="px-4 py-2 text-left">Gênero</th>
+              <th class="px-4 py-2 text-left">Duração</th>
+              <th class="px-4 py-2 text-left">Classificação</th>
+              <th class="px-4 py-2 text-left">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaFilmes">
+            <!-- Filmes serão carregados dinamicamente aqui -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal do carrinho -->
+  <div id="modalCarrinho" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white text-black p-6 rounded shadow-lg w-96 relative">
+      <button onclick="fecharModalCarrinho()" class="absolute top-2 right-2 text-gray-600 hover:text-red-600">
+        ✖
+      </button>
+      <h3 class="text-xl font-bold mb-4">Seu Carrinho</h3>
+      <ul id="listaCarrinho" class="text-gray-700 space-y-2">
+        <li>Nenhum ingresso adicionado.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Rodapé -->
+  <footer class="text-center p-4 text-gray-400 mt-10">
+    © 2025 CineTickets. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    function carregarFilmesLocal() {
+      const dados = localStorage.getItem('filmes');
+      return dados ? JSON.parse(dados) : [];
+    }
+
+    function carregarCarrinho() {
+      const dados = localStorage.getItem('carrinho');
+      return dados ? JSON.parse(dados) : [];
+    }
+
+    function salvarCarrinho(carrinho) {
+      localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    }
+
+    function adicionarAoCarrinho(index) {
+      const filmes = carregarFilmesLocal();
+      const carrinho = carregarCarrinho();
+      carrinho.push(filmes[index]);
+      salvarCarrinho(carrinho);
+      window.location.href = "ingresso.html"; // Redireciona para a página de ingresso após adicionar
+    }
+
+    function renderizarFilmesNaTabela() {
+      const filmes = carregarFilmesLocal();
+      const tabela = document.getElementById('tabelaFilmes');
+      tabela.innerHTML = '';
+
+      filmes.forEach((filme, index) => {
+        const linha = document.createElement('tr');
+        linha.classList.add('border-t', 'border-gray-700');
+
+        linha.innerHTML = `
+          <td class="px-4 py-2"><img src="${filme.capa}" alt="Capa" class="h-16 rounded"></td>
+          <td class="px-4 py-2">${filme.titulo}</td>
+          <td class="px-4 py-2">${filme.genero}</td>
+          <td class="px-4 py-2">${filme.duracao} min</td>
+          <td class="px-4 py-2">${filme.classificacao}</td>
+          <td class="px-4 py-2">
+            <button onclick="adicionarAoCarrinho(${index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Comprar</button>
+          </td>
+        `;
+        tabela.appendChild(linha);
+      });
+    }
+
+    function abrirModalCarrinho() {
+      const lista = document.getElementById('listaCarrinho');
+      const carrinho = carregarCarrinho();
+      lista.innerHTML = '';
+
+      if (carrinho.length === 0) {
+        lista.innerHTML = '<li>Nenhum ingresso adicionado.</li>';
+      } else {
+        carrinho.forEach(filme => {
+          const item = document.createElement('li');
+          item.textContent = `🎟️ ${filme.titulo} - ${filme.duracao} min`;
+          lista.appendChild(item);
+        });
+      }
+
+      document.getElementById('modalCarrinho').classList.remove('hidden');
+    }
+
+    function fecharModalCarrinho() {
+      document.getElementById('modalCarrinho').classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderizarFilmesNaTabela);
+  </script>
+</body>
+</html>

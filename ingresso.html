@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineTickets - Compre seu Ingresso</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .assento {
+      width: 24px;
+      height: 24px;
+      margin: 4px;
+      border-radius: 50%;
+      background-color: #6b7280;
+      cursor: pointer;
+    }
+    .assento.selecionado {
+      background-color: #10b981;
+    }
+    .assento.ocupado {
+      background-color: #ef4444;
+      cursor: not-allowed;
+    }
+    .assento.inativo {
+      background-color: #374151;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+  <header class="bg-red-600 p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">CineTickets 🎬</h1>
+    <div class="flex gap-4 items-center">
+      <button onclick="abrirModalCarrinho()" class="text-white hover:text-gray-200 text-2xl" title="Carrinho">
+        🛒
+      </button>
+      <a href="../Adm.html" class="text-white hover:text-gray-200" title="Área Administrativa">
+        ⚙️
+      </a>
+    </div>
+  </header>
+
+  <main class="p-6 max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
+    <section class="flex-1 bg-gray-800 p-4 rounded overflow-x-auto">
+      <h2 class="text-lg font-semibold mb-4">Selecione seus assentos</h2>
+      <div class="flex flex-col items-center">
+        <div id="mapaAssentos" class="flex flex-col"></div>
+      </div>
+      <p class="mt-4 text-sm text-gray-400">Clique nos assentos disponíveis para selecionar.</p>
+    </section>
+
+    <aside class="w-full md:w-1/3 bg-gray-800 p-4 rounded">
+      <h2 class="text-lg font-semibold mb-4">Resumo do Pedido</h2>
+      <div id="resumoFilme" class="mb-4"></div>
+      <div class="border-t border-gray-600 pt-4">
+        <p><strong>Assentos selecionados:</strong> <span id="assentosSelecionados">Nenhum</span></p>
+        <p><strong>Total:</strong> R$ <span id="valorTotal">0.00</span></p>
+        <button class="mt-4 bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white w-full">
+          Finalizar Compra
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="text-center p-4 text-gray-400 mt-10">
+    © 2025 CineTickets. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    const precoIngresso = 22.00;
+    const assentosSelecionados = new Set();
+
+    function gerarMapaAssentos() {
+      const mapa = document.getElementById('mapaAssentos');
+      mapa.innerHTML = '';
+      const fileiras = 'ONMLKJIHGFEDCBA';
+
+      fileiras.split('').forEach((letra, linhaIndex) => {
+        const linha = document.createElement('div');
+        linha.className = 'flex items-center justify-center mb-1';
+
+        const rotulo = document.createElement('span');
+        rotulo.className = 'w-4 mr-2 text-sm text-gray-400';
+        rotulo.textContent = letra;
+        linha.appendChild(rotulo);
+
+        for (let i = 1; i <= 15; i++) {
+          const numero = `${letra}${i}`;
+          const assento = document.createElement('div');
+          assento.className = 'assento text-xs text-center flex items-center justify-center';
+          assento.textContent = i;
+          assento.title = `Assento ${numero}`;
+
+          // Desativar assentos nas regras específicas
+          const desativar1e2 = (i === 1 || i === 2) && 'ABCDEFGHI'.includes(letra);
+          const desativar14e15 = (i === 14 || i === 15) && 'ABCDEFGHIJKL'.includes(letra);
+          if (desativar1e2 || desativar14e15) {
+            assento.classList.add('inativo');
+          } else {
+            assento.addEventListener('click', () => selecionarAssento(numero, assento));
+          }
+
+          linha.appendChild(assento);
+        }
+
+        mapa.appendChild(linha);
+      });
+    }
+
+    function selecionarAssento(numero, elemento) {
+      if (elemento.classList.contains('ocupado') || elemento.classList.contains('inativo')) return;
+      if (assentosSelecionados.has(numero)) {
+        assentosSelecionados.delete(numero);
+        elemento.classList.remove('selecionado');
+      } else {
+        assentosSelecionados.add(numero);
+        elemento.classList.add('selecionado');
+      }
+      atualizarResumo();
+    }
+
+    function atualizarResumo() {
+      const total = assentosSelecionados.size * precoIngresso;
+      document.getElementById('assentosSelecionados').textContent = 
+        assentosSelecionados.size > 0 ? Array.from(assentosSelecionados).join(', ') : 'Nenhum';
+      document.getElementById('valorTotal').textContent = total.toFixed(2);
+    }
+
+    function carregarFilmeSelecionado() {
+      const carrinho = localStorage.getItem('carrinho');
+      if (!carrinho) return;
+      const filme = JSON.parse(carrinho).slice(-1)[0];
+      const resumo = document.getElementById('resumoFilme');
+      resumo.innerHTML = `
+        <img src="${filme.capa}" class="h-40 w-full object-cover rounded mb-2" />
+        <h3 class="text-lg font-bold">${filme.titulo}</h3>
+        <p class="text-sm text-gray-400">${filme.duracao} min • ${filme.classificacao}</p>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      gerarMapaAssentos();
+      carregarFilmeSelecionado();
+    });
+  </script>
+</body>
+</html>
